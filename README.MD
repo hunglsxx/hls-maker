@@ -12,7 +12,7 @@ npm install hls-maker
 
 ## Usage
 ### Using Promises
-```bash
+```javascript
 import { HLSMaker, HLSMakerConfig } from 'hls-maker';
 
 const options: HLSMakerConfig = {
@@ -32,7 +32,7 @@ hlsMaker.conversion(progress => {
 });
 ```
 ### Using async/await
-```bash
+```javascript
 import { HLSMaker, HLSMakerConfig } from 'hls-maker';
 
 const options: HLSMakerConfig = {
@@ -54,6 +54,44 @@ async function convertVideo() {
 convertVideo();
 ```
 
+## Concatenating HLS Streams
+You can concatenate HLS streams using the concat method. This method combines multiple HLS streams into a single stream.
+### Using callback function
+```javascript
+import { HLSMaker, ConcatConfig } from 'hls-maker';
+
+const options: ConcatConfig = {
+    sourceFilePath: 'path/to/first/video.mp4',
+    hlsManifestPath: 'path/to/concatenated/output.m3u8',
+    isLast: true // Set to true if this is the last stream in the sequence
+};
+
+HLSMaker.concat(options, function (process) {
+    console.log("Processing", process);
+});
+```
+### Using async/await
+```javascript
+import { HLSMaker, ConcatConfig } from 'hls-maker';
+
+const options: ConcatConfig = {
+    sourceFilePath: 'path/to/first/video.m3u8',
+    hlsManifestPath: 'path/to/concatenated/output.m3u8',
+    isLast: true // Set to true if this is the last stream in the sequence
+};
+
+async function concatVideos() {
+    try {
+        await HLSMaker.concat(options);
+        console.log('Concatenation completed');
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+concatVideos();
+```
+
 ## Options
 ### HLSMakerConfig
 - ```sourceFilePath``` (required): Path to the source file.
@@ -64,6 +102,10 @@ convertVideo();
 - ```hlsListSize```: Manifest list size.
 - ```appendMode``` (required): Append mode for segments.
 - ```endlessMode``` (required): Endless mode (no termination).
+### ConcatConfig
+- ```sourceFilePath``` (required): Path to the source file of the first segment.
+- ```hlsManifestPath``` (required): Path to the output manifest file after concatenation.
+- ```isLast``` (required): Set to true if this is the last stream in the sequence.
 
 ## Support
 
@@ -71,4 +113,3 @@ Contact the author: hunglsxx@gmail.com
 
 ## License
 This library is released under the MIT License.
-
