@@ -8,6 +8,11 @@ export interface HLSMakerConfig {
     appendMode: boolean;
     endlessMode: boolean;
 }
+export interface ConcatConfig {
+    hlsManifestPath: string;
+    sourceFilePath: string;
+    isLast: boolean;
+}
 export declare class HLSMaker {
     sourceFilePath: string;
     sourceMimeType: string | undefined;
@@ -23,12 +28,13 @@ export declare class HLSMaker {
     private _ffmpegOutputOptions;
     constructor(options: HLSMakerConfig);
     conversion(callback?: (progress: any) => void): Promise<void>;
+    static concat(options: ConcatConfig, callback?: (progress: any) => void): Promise<void>;
     prepareFFmpegOptions(): void;
+    static timeMarkToMs(timeString: string): number;
+    static msToTimeMark(milliseconds: number): string;
     /**
      * Chỗ này có thể dùng ffprobe để trích xuất cho chính xác
      */
     private _setMediaInfo;
     private _getDefaultManifestPath;
-    static timeMarkToMs(timeString: string): number;
-    static msToTimeMark(milliseconds: number): string;
 }

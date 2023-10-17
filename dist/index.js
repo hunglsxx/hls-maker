@@ -40,19 +40,34 @@ class HLSMaker {
                 console.log('ffmpeg command:', command);
             })
                 .on('progress', (progress) => {
+                progress = Object.assign(Object.assign({}, progress), { input: that.sourceFilePath, output: that.hlsManifestPath });
                 if (callback) {
                     callback(progress);
                 }
                 else {
-                    console.log("Conversion Processing", that.sourceFilePath, progress);
+                    console.log(progress);
                 }
             })
                 .on('end', () => {
-                console.log('Conversion Ended', that.sourceFilePath);
+                console.log({ input: that.sourceFilePath, output: that.hlsManifestPath, percent: 100 });
                 resolve();
             })
                 .run();
         });
+    }
+    static async concat(options, callback) {
+        let concatdHls = new HLSMaker({
+            sourceFilePath: options.sourceFilePath,
+            hlsManifestPath: options.hlsManifestPath,
+            appendMode: true,
+            endlessMode: !options.isLast
+        });
+        if (callback) {
+            concatdHls.conversion(callback);
+        }
+        else {
+            await concatdHls.conversion();
+        }
     }
     prepareFFmpegOptions() {
         try {
@@ -113,34 +128,6 @@ class HLSMaker {
             throw error;
         }
     }
-    /**
-     * Chỗ này có thể dùng ffprobe để trích xuất cho chính xác
-     */
-    _setMediaInfo() {
-        try {
-            this.sourceMimeType = mime_1.default.getType(this.sourceFilePath) || '';
-            this.sourceExtension = mime_1.default.getExtension(this.sourceMimeType) || '';
-            fluent_ffmpeg_1.default.ffprobe(this.sourceFilePath, (error, metadata) => {
-                var _a;
-                if (error)
-                    throw error;
-                this.sourceDuration = (((_a = metadata === null || metadata === void 0 ? void 0 : metadata.format) === null || _a === void 0 ? void 0 : _a.duration) || 0) * 1000;
-            });
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    _getDefaultManifestPath() {
-        try {
-            if (!this.sourceFilePath)
-                return "";
-            return `${path_1.default.join(path_1.default.dirname(this.sourceFilePath), path_1.default.basename(this.sourceFilePath))}.m3u8`;
-        }
-        catch (error) {
-            throw error;
-        }
-    }
     static timeMarkToMs(timeString) {
         try {
             const timeParts = timeString.split(':');
@@ -167,6 +154,28 @@ class HLSMaker {
         catch (error) {
             throw error;
         }
+    }
+    /**
+     * Chỗ này có thể dùng ffprobe để trích xuất cho chính xác
+     */
+    _setMediaInfo() {
+        try {
+            this.sourceMimeType = mime_1.default.getType(this.sourceFilePath) || '';
+            this.sourceExtension = mime_1.default.getExtension(this.sourceMimeType) || '';
+            fluent_ffmpeg_1.default.ffprobe(this.sourceFilePath, (error, metadata) => {
+                var _a;
+                if (error)
+                    throw error;
+                this.sourceDuration = (((_a = metadata === null || metadata === void 0 ? void 0 : metadata.format) === null || _a === void 0 ? void 0 : _a.duration) || 0) * 1000;
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    _getDefaultManifestPath() {
+        const pathObject = path_1.default.parse(this.sourceFilePath);
+        return path_1.default.join(pathObject.dir, `${pathObject.name}.m3u8`);
     }
 }
 exports.HLSMaker = HLSMaker;
