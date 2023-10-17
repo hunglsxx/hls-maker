@@ -11,7 +11,7 @@ npm install hls-maker
 ```
 
 ## Usage
-
+### Using Promises
 ```bash
 import { HLSMaker, HLSMakerConfig } from 'hls-maker';
 
@@ -31,18 +31,39 @@ hlsMaker.conversion(progress => {
     console.error('Error:', error);
 });
 ```
+### Using async/await
+```bash
+import { HLSMaker, HLSMakerConfig } from 'hls-maker';
+
+const options: HLSMakerConfig = {
+    sourceFilePath: 'path/to/source/video.mp4',
+    // Other options as per your requirements
+};
+
+async function convertVideo() {
+    const hlsMaker = new HLSMaker(options);
+
+    try {
+        await hlsMaker.conversion();
+        console.log('Conversion completed');
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+convertVideo();
+```
 
 ## Options
-
 ### HLSMakerConfig
-- ```sourceFilePath```: Path to the source file (required).
+- ```sourceFilePath``` (required): Path to the source file.
 - ```hlsStartTime```: Start time for segmenting in HLS.
 - ```hlsDuration```: Duration of the segment for HLS.
 - ```hlsManifestPath```: Path to the HLS manifest file after segmenting.
 - ```hlsSegmentDuration```: Duration of each segment (in seconds).
 - ```hlsListSize```: Manifest list size.
-- ```appendMode```: Append mode for segments.
-- ```endlessMode```: Endless mode (no termination).
+- ```appendMode``` (required): Append mode for segments.
+- ```endlessMode``` (required): Endless mode (no termination).
 
 ## Support
 
