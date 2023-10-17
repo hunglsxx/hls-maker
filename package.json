@@ -1,0 +1,46 @@
+{
+    "name": "hls-maker",
+    "version": "1.0.0",
+    "description": "HLSMaker is a library that helps create HLS (HTTP Live Streaming) video segments from a source file. HLS is a protocol for distributing video over the internet.",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc",
+        "prepare": "npm run build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hunglsxx/hls-maker.git"
+    },
+    "bugs": {
+        "url": "https://github.com/hunglsxx/hls-maker/issues"
+    },
+    "homepage": "https://github.com/hunglsxx/hls-maker",
+    "keywords": [
+        "HLS",
+        "HTTP Live Streaming",
+        "video streaming",
+        "video segmentation",
+        "FFmpeg",
+        "Node.js",
+        "media processing",
+        "video conversion",
+        "video encoding",
+        "streaming library"
+    ],
+    "author": "hungls",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^5.2.2"
+    },
+    "dependencies": {
+        "@types/fluent-ffmpeg": "^2.1.22",
+        "@types/mime": "^3.0.2",
+        "fluent-ffmpeg": "^2.1.2",
+        "mime": "^3.0.0"
+    }
+}
