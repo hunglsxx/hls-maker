@@ -79,11 +79,11 @@ export class HLSMaker {
                     if (callback) {
                         callback(progress);
                     } else {
-                        console.log(progress);
+                        // console.log(progress);
                     }
                 })
                 .on('end', () => {
-                    resolve(lastProgress);
+                    resolve({ input: that.sourceFilePath, output: that.hlsManifestPath });
                 })
                 .run();
         })
