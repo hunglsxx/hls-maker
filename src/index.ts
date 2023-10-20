@@ -57,10 +57,10 @@ export class HLSMaker {
         this.prepareFFmpegOptions();
     }
 
-    public async conversion(callback?: (progress: any) => void): Promise<void> {
+    public async conversion(callback?: (progress: any) => void): Promise<any> {
         let that = this;
         let lastProgress: any;
-        await new Promise<any>((resolve, reject) => {
+        return await new Promise<any>((resolve, reject) => {
             ffmpeg(that.sourceFilePath)
                 .outputOptions(that._ffmpegOutputOptions || [])
                 .output(that.hlsManifestPath)
@@ -74,16 +74,13 @@ export class HLSMaker {
                     console.log('ffmpeg command:', command);
                 })
                 .on('progress', (progress) => {
-                    progress = { ...progress, input: that.sourceFilePath, output: that.hlsManifestPath };
-                    lastProgress = progress;
+                    lastProgress = { ...progress, input: that.sourceFilePath, output: that.hlsManifestPath };
                     if (callback) {
-                        callback(progress);
-                    } else {
-                        // console.log(progress);
+                        callback(lastProgress);
                     }
                 })
                 .on('end', () => {
-                    resolve({ input: that.sourceFilePath, output: that.hlsManifestPath });
+                    return resolve(lastProgress);
                 })
                 .run();
         })

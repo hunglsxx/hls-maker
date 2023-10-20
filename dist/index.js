@@ -27,7 +27,7 @@ class HLSMaker {
     async conversion(callback) {
         let that = this;
         let lastProgress;
-        await new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             (0, fluent_ffmpeg_1.default)(that.sourceFilePath)
                 .outputOptions(that._ffmpegOutputOptions || [])
                 .output(that.hlsManifestPath)
@@ -41,17 +41,13 @@ class HLSMaker {
                 console.log('ffmpeg command:', command);
             })
                 .on('progress', (progress) => {
-                progress = Object.assign(Object.assign({}, progress), { input: that.sourceFilePath, output: that.hlsManifestPath });
-                lastProgress = progress;
+                lastProgress = Object.assign(Object.assign({}, progress), { input: that.sourceFilePath, output: that.hlsManifestPath });
                 if (callback) {
-                    callback(progress);
-                }
-                else {
-                    // console.log(progress);
+                    callback(lastProgress);
                 }
             })
                 .on('end', () => {
-                resolve({ input: that.sourceFilePath, output: that.hlsManifestPath });
+                return resolve(lastProgress);
             })
                 .run();
         });

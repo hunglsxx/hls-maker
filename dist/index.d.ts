@@ -27,7 +27,7 @@ export declare class HLSMaker {
     endlessMode: boolean;
     private _ffmpegOutputOptions;
     constructor(options: HLSMakerConfig);
-    conversion(callback?: (progress: any) => void): Promise<void>;
+    conversion(callback?: (progress: any) => void): Promise<any>;
     static concat(options: ConcatConfig, callback?: (progress: any) => void): Promise<void>;
     prepareFFmpegOptions(): void;
     static timeMarkToMs(timeString: string): number;
