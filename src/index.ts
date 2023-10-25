@@ -122,9 +122,6 @@ export class HLSMaker {
 
         let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
 
-        console.log(dests, sources);
-
-
         if (options.spliceIndex === undefined) options.spliceIndex = -1;
 
         if (options.splicePercent) {
