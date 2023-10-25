@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,6 +31,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const mime_1 = __importDefault(require("mime"));
+const HLS = __importStar(require("hls-parser-rebuild"));
 class HLSMaker {
     constructor(options) {
         if (!fs_1.default.existsSync(options.sourceFilePath)) {
@@ -57,7 +81,7 @@ class HLSMaker {
             sourceFilePath: options.sourceFilePath,
             hlsManifestPath: options.hlsManifestPath,
             appendMode: true,
-            endlessMode: !options.isLast
+            endlessMode: options.endlessMode
         });
         if (callback) {
             concatdHls.conversion(callback);
@@ -65,6 +89,33 @@ class HLSMaker {
         else {
             await concatdHls.conversion();
         }
+    }
+    static async insert(options) {
+        const contentDest = fs_1.default.readFileSync(options.hlsManifestPath, {
+            encoding: 'utf8'
+        });
+        const contentSource = fs_1.default.readFileSync(options.sourceHlsManifestPath, {
+            encoding: 'utf8'
+        });
+        let dests = JSON.parse(JSON.stringify(HLS.parse(contentDest)));
+        let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
+        console.log(dests, sources);
+        if (options.spliceIndex === undefined)
+            options.spliceIndex = -1;
+        if (options.splicePercent) {
+            let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
+            if (sliceIndex > 0 && sliceIndex < dests.segments.length)
+                options.spliceIndex = sliceIndex;
+        }
+        dests.segments.splice(options.spliceIndex, 0, ...sources.segments);
+        let newSegments = [];
+        for (let seg of dests.segments) {
+            newSegments.push(new HLS.types.Segment(seg));
+        }
+        delete dests.segments;
+        dests['segments'] = newSegments;
+        let hlsText = HLS.stringify(dests);
+        fs_1.default.writeFileSync(options.hlsManifestPath, hlsText);
     }
     prepareFFmpegOptions() {
         try {

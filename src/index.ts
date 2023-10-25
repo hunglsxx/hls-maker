@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import mime from 'mime';
+import * as HLS from 'hls-parser-rebuild';
 
 export interface HLSMakerConfig {
     sourceFilePath: string;          // Path to the source file
@@ -20,7 +21,14 @@ export interface HLSMakerConfig {
 export interface ConcatConfig {
     hlsManifestPath: string;
     sourceFilePath: string;
-    isLast: boolean;
+    endlessMode: boolean;
+}
+
+export interface InsertConfig {
+    hlsManifestPath: string,
+    sourceHlsManifestPath: string,
+    spliceIndex?: number,
+    splicePercent?: number
 }
 
 export class HLSMaker {
@@ -91,13 +99,51 @@ export class HLSMaker {
             sourceFilePath: options.sourceFilePath,
             hlsManifestPath: options.hlsManifestPath,
             appendMode: true,
-            endlessMode: !options.isLast
+            endlessMode: options.endlessMode
         });
         if (callback) {
             concatdHls.conversion(callback);
         } else {
             await concatdHls.conversion();
         }
+    }
+
+    public static async insert(options: InsertConfig): Promise<void> {
+
+        const contentDest = fs.readFileSync(options.hlsManifestPath, {
+            encoding: 'utf8'
+        });
+
+        const contentSource = fs.readFileSync(options.sourceHlsManifestPath, {
+            encoding: 'utf8'
+        });
+
+        let dests = JSON.parse(JSON.stringify(HLS.parse(contentDest)));
+
+        let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
+
+        console.log(dests, sources);
+
+
+        if (options.spliceIndex === undefined) options.spliceIndex = -1;
+
+        if (options.splicePercent) {
+            let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
+            if (sliceIndex > 0 && sliceIndex < dests.segments.length) options.spliceIndex = sliceIndex;
+        }
+
+        dests.segments.splice(options.spliceIndex, 0, ...sources.segments);
+
+        let newSegments: Array<HLS.types.Segment> = [];
+        for (let seg of dests.segments) {
+            newSegments.push(new HLS.types.Segment(seg));
+        }
+
+        delete dests.segments;
+        dests['segments'] = newSegments;
+
+        let hlsText = HLS.stringify(dests);
+        fs.writeFileSync(options.hlsManifestPath, hlsText);
     }
 
     public prepareFFmpegOptions() {

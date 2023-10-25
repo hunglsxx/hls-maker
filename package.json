@@ -1,6 +1,6 @@
 {
     "name": "hls-maker",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "description": "HLSMaker is a library that helps create HLS (HTTP Live Streaming) video segments from a source file. HLS is a protocol for distributing video over the internet.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -41,6 +41,7 @@
         "@types/fluent-ffmpeg": "^2.1.22",
         "@types/mime": "^3.0.2",
         "fluent-ffmpeg": "^2.1.2",
+        "hls-parser-rebuild": "^0.10.9",
         "mime": "^3.0.0"
     }
 }

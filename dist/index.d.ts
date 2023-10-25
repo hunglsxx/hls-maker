@@ -11,7 +11,13 @@ export interface HLSMakerConfig {
 export interface ConcatConfig {
     hlsManifestPath: string;
     sourceFilePath: string;
-    isLast: boolean;
+    endlessMode: boolean;
+}
+export interface InsertConfig {
+    hlsManifestPath: string;
+    sourceHlsManifestPath: string;
+    spliceIndex?: number;
+    splicePercent?: number;
 }
 export declare class HLSMaker {
     sourceFilePath: string;
@@ -29,6 +35,7 @@ export declare class HLSMaker {
     constructor(options: HLSMakerConfig);
     conversion(callback?: (progress: any) => void): Promise<any>;
     static concat(options: ConcatConfig, callback?: (progress: any) => void): Promise<void>;
+    static insert(options: InsertConfig): Promise<void>;
     prepareFFmpegOptions(): void;
     static timeMarkToMs(timeString: string): number;
     static msToTimeMark(milliseconds: number): string;
