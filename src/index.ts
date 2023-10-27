@@ -16,12 +16,18 @@ export interface HLSMakerConfig {
 
     appendMode: boolean;             // Append mode for segments
     endlessMode: boolean;            // Endless mode (no termination)
+
+    ffmpegInputOptions?: Array<string>;
+    ffmpegOutputOptions?: Array<string>;
 }
 
 export interface ConcatConfig {
     hlsManifestPath: string;
     sourceFilePath: string;
     endlessMode: boolean;
+
+    ffmpegInputOptions?: Array<string>;
+    ffmpegOutputOptions?: Array<string>;
 }
 
 export interface InsertConfig {
@@ -47,6 +53,7 @@ export class HLSMaker {
     public endlessMode: boolean;
 
     private _ffmpegOutputOptions: Array<string> | undefined;
+    private _ffmpegInputOptions: Array<string>;
 
     constructor(options: HLSMakerConfig) {
         if (!fs.existsSync(options.sourceFilePath)) {
@@ -62,15 +69,23 @@ export class HLSMaker {
         this.hlsListSize = options.hlsListSize || 0;
 
         this._setMediaInfo();
-        this.prepareFFmpegOptions();
+        this._ffmpegInputOptions = options.ffmpegInputOptions || [];
+        if (options.ffmpegOutputOptions) {
+            this._ffmpegOutputOptions = options.ffmpegOutputOptions;
+        } else {
+            this.prepareFFmpegOptions();
+        }
     }
 
     public async conversion(callback?: (progress: any) => void): Promise<any> {
         let that = this;
         let lastProgress: any;
         return await new Promise<any>((resolve, reject) => {
-            ffmpeg(that.sourceFilePath)
-                .outputOptions(that._ffmpegOutputOptions || [])
+            let ffmpegProcess = ffmpeg(that.sourceFilePath);
+            if (that._ffmpegInputOptions.length > 0) {
+                ffmpegProcess.inputOptions(that._ffmpegInputOptions);
+            }
+            ffmpegProcess.outputOptions(that._ffmpegOutputOptions || [])
                 .output(that.hlsManifestPath)
                 .on('error', (err, stdout, stderr) => {
                     console.error('Error:', err.message);
@@ -89,8 +104,9 @@ export class HLSMaker {
                 })
                 .on('end', () => {
                     return resolve(lastProgress);
-                })
-                .run();
+                });
+
+            ffmpegProcess.run();
         })
     }
 

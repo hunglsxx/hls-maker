@@ -46,14 +46,23 @@ class HLSMaker {
         this.endlessMode = options.endlessMode;
         this.hlsListSize = options.hlsListSize || 0;
         this._setMediaInfo();
-        this.prepareFFmpegOptions();
+        this._ffmpegInputOptions = options.ffmpegInputOptions || [];
+        if (options.ffmpegOutputOptions) {
+            this._ffmpegOutputOptions = options.ffmpegOutputOptions;
+        }
+        else {
+            this.prepareFFmpegOptions();
+        }
     }
     async conversion(callback) {
         let that = this;
         let lastProgress;
         return await new Promise((resolve, reject) => {
-            (0, fluent_ffmpeg_1.default)(that.sourceFilePath)
-                .outputOptions(that._ffmpegOutputOptions || [])
+            let ffmpegProcess = (0, fluent_ffmpeg_1.default)(that.sourceFilePath);
+            if (that._ffmpegInputOptions.length > 0) {
+                ffmpegProcess.inputOptions(that._ffmpegInputOptions);
+            }
+            ffmpegProcess.outputOptions(that._ffmpegOutputOptions || [])
                 .output(that.hlsManifestPath)
                 .on('error', (err, stdout, stderr) => {
                 console.error('Error:', err.message);
@@ -72,8 +81,8 @@ class HLSMaker {
             })
                 .on('end', () => {
                 return resolve(lastProgress);
-            })
-                .run();
+            });
+            ffmpegProcess.run();
         });
     }
     static async concat(options, callback) {

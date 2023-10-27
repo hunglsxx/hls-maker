@@ -7,11 +7,15 @@ export interface HLSMakerConfig {
     hlsListSize?: number;
     appendMode: boolean;
     endlessMode: boolean;
+    ffmpegInputOptions?: Array<string>;
+    ffmpegOutputOptions?: Array<string>;
 }
 export interface ConcatConfig {
     hlsManifestPath: string;
     sourceFilePath: string;
     endlessMode: boolean;
+    ffmpegInputOptions?: Array<string>;
+    ffmpegOutputOptions?: Array<string>;
 }
 export interface InsertConfig {
     hlsManifestPath: string;
@@ -32,6 +36,7 @@ export declare class HLSMaker {
     appendMode: boolean;
     endlessMode: boolean;
     private _ffmpegOutputOptions;
+    private _ffmpegInputOptions;
     constructor(options: HLSMakerConfig);
     conversion(callback?: (progress: any) => void): Promise<any>;
     static concat(options: ConcatConfig, callback?: (progress: any) => void): Promise<void>;
