@@ -56,7 +56,7 @@ export class HLSMaker {
     private _ffmpegInputOptions: Array<string>;
 
     constructor(options: HLSMakerConfig) {
-        if (!fs.existsSync(options.sourceFilePath)) {
+        if (!this._isUrl(options.sourceFilePath) && !fs.existsSync(options.sourceFilePath)) {
             throw new Error(`Input path is not exist ${options.sourceFilePath}`);
         }
         this.sourceFilePath = options.sourceFilePath;
@@ -274,6 +274,15 @@ export class HLSMaker {
     private _getDefaultManifestPath(): string {
         const pathObject = path.parse(this.sourceFilePath);
         return path.join(pathObject.dir, `${pathObject.name}.m3u8`);
+    }
+
+    private _isUrl(path: string): boolean {
+        try {
+            new URL(path);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
 }

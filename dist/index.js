@@ -34,7 +34,7 @@ const mime_1 = __importDefault(require("mime"));
 const HLS = __importStar(require("hls-parser-rebuild"));
 class HLSMaker {
     constructor(options) {
-        if (!fs_1.default.existsSync(options.sourceFilePath)) {
+        if (!this._isUrl(options.sourceFilePath) && !fs_1.default.existsSync(options.sourceFilePath)) {
             throw new Error(`Input path is not exist ${options.sourceFilePath}`);
         }
         this.sourceFilePath = options.sourceFilePath;
@@ -232,6 +232,15 @@ class HLSMaker {
     _getDefaultManifestPath() {
         const pathObject = path_1.default.parse(this.sourceFilePath);
         return path_1.default.join(pathObject.dir, `${pathObject.name}.m3u8`);
+    }
+    _isUrl(path) {
+        try {
+            new URL(path);
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
     }
 }
 exports.HLSMaker = HLSMaker;

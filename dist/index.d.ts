@@ -49,4 +49,5 @@ export declare class HLSMaker {
      */
     private _setMediaInfo;
     private _getDefaultManifestPath;
+    private _isUrl;
 }
