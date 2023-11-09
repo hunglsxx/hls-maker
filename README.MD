@@ -92,6 +92,18 @@ async function concatVideos() {
 concatVideos();
 ```
 
+## Insert HLS Streams
+You can insert HLS streams using the insert method. This method combines multiple HLS streams into a single stream.
+
+```javascript
+await HLSMaker.insert({
+    hlsManifestPath: 'path/to/first/output.m3u8',
+    sourceHlsManifestPath: 'path/to/source/input.m3u8',
+    spliceIndex: 10 // insert from segment index
+    splicePercent: 30// insert from segment percent
+});
+```
+
 ## Options
 ### HLSMakerConfig
 - ```sourceFilePath``` (required): Path to the source file.
