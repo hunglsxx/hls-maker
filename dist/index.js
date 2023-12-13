@@ -86,13 +86,7 @@ class HLSMaker {
         });
     }
     static async concat(options, callback) {
-        let concatdHls = new HLSMaker(Object.assign(Object.assign({}, options), { 
-            // sourceFilePath: options.sourceFilePath,
-            // hlsManifestPath: options.hlsManifestPath,
-            // endlessMode: options.endlessMode,
-            // ffmpegInputOptions: options.ffmpegInputOptions,
-            // ffmpegOutputOptions: options.ffmpegOutputOptions,
-            appendMode: true }));
+        let concatdHls = new HLSMaker(Object.assign(Object.assign({}, options), { appendMode: true }));
         if (callback) {
             concatdHls.conversion(callback);
         }

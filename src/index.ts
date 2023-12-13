@@ -113,11 +113,6 @@ export class HLSMaker {
     public static async concat(options: ConcatConfig, callback?: (progress: any) => void): Promise<void> {
         let concatdHls = new HLSMaker({
             ...options,
-            // sourceFilePath: options.sourceFilePath,
-            // hlsManifestPath: options.hlsManifestPath,
-            // endlessMode: options.endlessMode,
-            // ffmpegInputOptions: options.ffmpegInputOptions,
-            // ffmpegOutputOptions: options.ffmpegOutputOptions,
             appendMode: true
         });
         if (callback) {
