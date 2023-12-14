@@ -34,7 +34,8 @@ export interface InsertConfig {
     hlsManifestPath: string,
     sourceHlsManifestPath: string,
     spliceIndex?: number,
-    splicePercent?: number
+    splicePercent?: number,
+    isLast?: boolean,
 }
 
 export class HLSMaker {
@@ -128,11 +129,9 @@ export class HLSMaker {
                 throw new Error(`HLS file is not exist ${options.sourceHlsManifestPath}`);
             }
 
-            let destIsExist = true;
             if (!fs.existsSync(options.hlsManifestPath)) {
-                destIsExist = false;
-                const manifestContent = '#EXTM3U\n#EXT-XVERSION:3';
-                fs.writeFileSync(options.hlsManifestPath, manifestContent);
+                fs.copyFileSync(options.sourceHlsManifestPath, options.hlsManifestPath);
+                return;
             }
 
             const contentDest = fs.readFileSync(options.hlsManifestPath, {
@@ -147,7 +146,7 @@ export class HLSMaker {
 
             let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
 
-            if (options.spliceIndex === undefined || !destIsExist) options.spliceIndex = -1;
+            if (options.spliceIndex === undefined) options.spliceIndex = dests.segments.length;
 
             if (options.splicePercent) {
                 let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
@@ -165,6 +164,11 @@ export class HLSMaker {
             dests['segments'] = newSegments;
 
             let hlsText = HLS.stringify(dests);
+
+            if (options.isLast == true) {
+                hlsText += '\n#EXT-X-ENDLIST';
+            }
+
             fs.writeFileSync(options.hlsManifestPath, hlsText);
         } catch (error) {
             throw error;

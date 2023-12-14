@@ -99,11 +99,9 @@ class HLSMaker {
             if (!fs_1.default.existsSync(options.sourceHlsManifestPath)) {
                 throw new Error(`HLS file is not exist ${options.sourceHlsManifestPath}`);
             }
-            let destIsExist = true;
             if (!fs_1.default.existsSync(options.hlsManifestPath)) {
-                destIsExist = false;
-                const manifestContent = '#EXTM3U\n#EXT-XVERSION:3';
-                fs_1.default.writeFileSync(options.hlsManifestPath, manifestContent);
+                fs_1.default.copyFileSync(options.sourceHlsManifestPath, options.hlsManifestPath);
+                return;
             }
             const contentDest = fs_1.default.readFileSync(options.hlsManifestPath, {
                 encoding: 'utf8'
@@ -113,8 +111,8 @@ class HLSMaker {
             });
             let dests = JSON.parse(JSON.stringify(HLS.parse(contentDest)));
             let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
-            if (options.spliceIndex === undefined || !destIsExist)
-                options.spliceIndex = -1;
+            if (options.spliceIndex === undefined)
+                options.spliceIndex = dests.segments.length;
             if (options.splicePercent) {
                 let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
                 if (sliceIndex > 0 && sliceIndex < dests.segments.length)
@@ -128,6 +126,9 @@ class HLSMaker {
             delete dests.segments;
             dests['segments'] = newSegments;
             let hlsText = HLS.stringify(dests);
+            if (options.isLast == true) {
+                hlsText += '\n#EXT-X-ENDLIST';
+            }
             fs_1.default.writeFileSync(options.hlsManifestPath, hlsText);
         }
         catch (error) {

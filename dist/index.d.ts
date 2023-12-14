@@ -22,6 +22,7 @@ export interface InsertConfig {
     sourceHlsManifestPath: string;
     spliceIndex?: number;
     splicePercent?: number;
+    isLast?: boolean;
 }
 export declare class HLSMaker {
     sourceFilePath: string;
