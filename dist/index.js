@@ -95,30 +95,44 @@ class HLSMaker {
         }
     }
     static async insert(options) {
-        const contentDest = fs_1.default.readFileSync(options.hlsManifestPath, {
-            encoding: 'utf8'
-        });
-        const contentSource = fs_1.default.readFileSync(options.sourceHlsManifestPath, {
-            encoding: 'utf8'
-        });
-        let dests = JSON.parse(JSON.stringify(HLS.parse(contentDest)));
-        let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
-        if (options.spliceIndex === undefined)
-            options.spliceIndex = -1;
-        if (options.splicePercent) {
-            let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
-            if (sliceIndex > 0 && sliceIndex < dests.segments.length)
-                options.spliceIndex = sliceIndex;
+        try {
+            if (!fs_1.default.existsSync(options.sourceHlsManifestPath)) {
+                throw new Error(`HLS file is not exist ${options.sourceHlsManifestPath}`);
+            }
+            let destIsExist = true;
+            if (!fs_1.default.existsSync(options.hlsManifestPath)) {
+                destIsExist = false;
+                const manifestContent = '#EXTM3U\n#EXT-XVERSION:3';
+                fs_1.default.writeFileSync(options.hlsManifestPath, manifestContent);
+            }
+            const contentDest = fs_1.default.readFileSync(options.hlsManifestPath, {
+                encoding: 'utf8'
+            });
+            const contentSource = fs_1.default.readFileSync(options.sourceHlsManifestPath, {
+                encoding: 'utf8'
+            });
+            let dests = JSON.parse(JSON.stringify(HLS.parse(contentDest)));
+            let sources = JSON.parse(JSON.stringify(HLS.parse(contentSource)));
+            if (options.spliceIndex === undefined || !destIsExist)
+                options.spliceIndex = -1;
+            if (options.splicePercent) {
+                let sliceIndex = Math.ceil((dests.segments.length * options.splicePercent) / 100) - 1;
+                if (sliceIndex > 0 && sliceIndex < dests.segments.length)
+                    options.spliceIndex = sliceIndex;
+            }
+            dests.segments.splice(options.spliceIndex, 0, ...sources.segments);
+            let newSegments = [];
+            for (let seg of dests.segments) {
+                newSegments.push(new HLS.types.Segment(seg));
+            }
+            delete dests.segments;
+            dests['segments'] = newSegments;
+            let hlsText = HLS.stringify(dests);
+            fs_1.default.writeFileSync(options.hlsManifestPath, hlsText);
         }
-        dests.segments.splice(options.spliceIndex, 0, ...sources.segments);
-        let newSegments = [];
-        for (let seg of dests.segments) {
-            newSegments.push(new HLS.types.Segment(seg));
+        catch (error) {
+            throw error;
         }
-        delete dests.segments;
-        dests['segments'] = newSegments;
-        let hlsText = HLS.stringify(dests);
-        fs_1.default.writeFileSync(options.hlsManifestPath, hlsText);
     }
     prepareFFmpegOptions() {
         try {
